@@ -1,5 +1,5 @@
-import logo from './logo.svg';
 import './App.css';
+import { Row, Col, Container } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import {
   JW3TContent,
@@ -9,20 +9,16 @@ import {
   PolkaJsVerifier,
 } from 'jw3t';
 import { Keyring } from '@polkadot/keyring';
-import { mnemonicGenerate } from '@polkadot/util-crypto';
-let createToken = async () => {
-  let keyring = new Keyring({ type: 'ed25519' });
-  let mnemonic = mnemonicGenerate();
-  let account = keyring.createFromUri(mnemonic);
-  let signingAccount = { account };
-  let address = account.address;
+import { mnemonicGenerate, cryptoWaitReady } from '@polkadot/util-crypto';
+
+let createToken = async (signingAccount) => {
   let header = {
-    alg: 'ed25519',
+    alg: 'sr25519',
     typ: 'JW3T',
     add: 'ss58',
   };
   let payload = {
-    add: address,
+    add: signingAccount?.account?.address,
   };
 
   let exp = Math.floor(Date.now() / 1000) + 24 * 3600; // expire in 24 hours
@@ -48,25 +44,36 @@ function App() {
   let [{ header, payload }, setContent] = useState({});
   let [error, setError] = useState();
   useEffect(() => {
-    createToken().then((token) => setToken(token));
+    cryptoWaitReady();
+    let keyring = new Keyring({ type: 'sr25519' });
+    let mnemonic = mnemonicGenerate();
+    let account = keyring.createFromUri(mnemonic);
+    let signingAccount = { account };
+    createToken(signingAccount).then((token) => setToken(token));
   }, []);
 
   useEffect(() => {
-    try {
-      verifyToken(token).then((content) => {
-        console.log(content);
-        setContent(content);
-      });
-    } catch (err) {
-      setError(err?.message || err);
-    }
+    token &&
+      verifyToken(token)
+        .then((content) => {
+          console.log(content);
+          setContent(content);
+        })
+        .catch((err) => setError(err?.message || err));
   }, [token]);
   return (
-    <div>
-      <p>{token}</p>
-      <p>{JSON.stringify(header)}</p>
-      <p>{JSON.stringify(payload)}</p>
-    </div>
+    <Container className="py-5">
+      <Row>
+        <Col xs={6} className="text-break">
+          <p className="w-100">{token}</p>
+          <p className="w-100">{error}</p>
+        </Col>
+        <Col xs={6} className="text-break d-flex flex-row">
+          <textarea className="w-100" value={JSON.stringify(header)} />
+          <textarea className="w-100" value={JSON.stringify(payload)} />
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
