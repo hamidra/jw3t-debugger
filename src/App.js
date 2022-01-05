@@ -1,5 +1,5 @@
 import './App.css';
-import { Row, Col, Container } from 'react-bootstrap';
+import { Row, Col, Container, Dropdown, DropdownButton } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
 import {
   JW3TContent,
@@ -8,9 +8,14 @@ import {
   PolkaJsSigner,
   PolkaJsVerifier,
 } from 'jw3t';
-import { Keyring } from '@polkadot/keyring';
-import { mnemonicGenerate, cryptoWaitReady } from '@polkadot/util-crypto';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { stringShorten } from '@polkadot/util';
+import { loadSigningAccounts } from './extension';
 
+let initializeAccounts = async () => {
+  await cryptoWaitReady();
+  return loadSigningAccounts();
+};
 let createToken = async (signingAccount) => {
   let header = {
     alg: 'sr25519',
@@ -39,18 +44,53 @@ let verifyToken = async (token) => {
   return content;
 };
 
+function AccountDropdown({
+  signingAccounts,
+  selectedSigningAccount,
+  selectHandler,
+}) {
+  let title = selectedSigningAccount?.account?.address
+    ? stringShorten(selectedSigningAccount?.account?.address, 5)
+    : '';
+  signingAccounts = signingAccounts.filter((sa) => sa?.account?.address);
+  return (
+    <DropdownButton
+      id="dropdown-item-button"
+      title={title}
+      onSelect={(selectedIdx) =>
+        selectHandler && selectHandler(signingAccounts[selectedIdx])
+      }>
+      {signingAccounts.map((sa, idx) => {
+        let text = sa.account.address;
+        return (
+          <Dropdown.Item as="button" eventKey={idx}>
+            {text}
+          </Dropdown.Item>
+        );
+      })}
+    </DropdownButton>
+  );
+}
 function App() {
+  let [signingAccounts, setSigningAccounts] = useState([]);
+  let [signingAccount, setSigningAccount] = useState();
   let [token, setToken] = useState('');
   let [{ header, payload }, setContent] = useState({});
   let [error, setError] = useState();
   useEffect(() => {
-    cryptoWaitReady();
-    let keyring = new Keyring({ type: 'sr25519' });
-    let mnemonic = mnemonicGenerate();
-    let account = keyring.createFromUri(mnemonic);
-    let signingAccount = { account };
-    createToken(signingAccount).then((token) => setToken(token));
+    initializeAccounts().then((accounts) => {
+      accounts && console.log(accounts[0]?.address || 'noaddress');
+      setSigningAccounts(accounts);
+      setSigningAccount(accounts[0]);
+    });
   }, []);
+
+  useEffect(() => {
+    signingAccount &&
+      createToken(signingAccount)
+        .then((token) => setToken(token))
+        .catch((err) => alert(err));
+  }, [signingAccount]);
 
   useEffect(() => {
     token &&
@@ -64,11 +104,20 @@ function App() {
   return (
     <Container className="py-5">
       <Row>
-        <Col xs={6} className="text-break">
+        <Col xl="12" className="text-break">
           <p className="w-100">{token}</p>
           <p className="w-100">{error}</p>
         </Col>
-        <Col xs={6} className="text-break d-flex flex-row">
+        <Col xl="12">
+          <AccountDropdown
+            signingAccounts={signingAccounts}
+            selectedSigningAccount={signingAccount}
+            selectHandler={(signingAccount) =>
+              setSigningAccount(signingAccount)
+            }
+          />
+        </Col>
+        <Col xl="12" className="text-break d-flex flex-column">
           <textarea className="w-100" value={JSON.stringify(header)} />
           <textarea className="w-100" value={JSON.stringify(payload)} />
         </Col>

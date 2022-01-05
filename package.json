@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@polkadot/extension-dapp": "^0.42.4",
     "@polkadot/keyring": "^8.2.2",
+    "@polkadot/util": "^8.2.2",
     "@polkadot/util-crypto": "^8.2.2",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
