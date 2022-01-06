@@ -16,7 +16,11 @@ export const loadSigningAccounts = async () => {
     '//Fredie',
   ];
   for (let testAccount of testAccounts) {
-    signingAccounts.push({ account: keyring.createFromUri(testAccount) });
+    signingAccounts.push({
+      account: keyring.createFromUri(testAccount, {
+        name: testAccount.slice(2),
+      }),
+    });
   }
   const injectedExt = await web3Enable('jw3t debugger');
   console.log(injectedExt);

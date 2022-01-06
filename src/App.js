@@ -44,24 +44,31 @@ let verifyToken = async (token) => {
   return content;
 };
 
+function getAccountDisplayStr(account) {
+  let str = '';
+  if (account?.meta?.name) str += `(${account?.meta?.name}) `;
+  if (account?.address) str += `${stringShorten(account?.address)}`;
+  return str;
+}
+
 function AccountDropdown({
   signingAccounts,
   selectedSigningAccount,
   selectHandler,
 }) {
-  let title = selectedSigningAccount?.account?.address
-    ? stringShorten(selectedSigningAccount?.account?.address, 5)
-    : '';
   signingAccounts = signingAccounts.filter((sa) => sa?.account?.address);
+  let title = getAccountDisplayStr(selectedSigningAccount?.account);
   return (
     <DropdownButton
       id="dropdown-item-button"
+      variant="transparent"
+      className="border border-primary rounded"
       title={title}
       onSelect={(selectedIdx) =>
         selectHandler && selectHandler(signingAccounts[selectedIdx])
       }>
       {signingAccounts.map((sa, idx) => {
-        let text = sa.account.address;
+        let text = getAccountDisplayStr(sa?.account);
         return (
           <Dropdown.Item as="button" eventKey={idx}>
             {text}
@@ -104,11 +111,11 @@ function App() {
   return (
     <Container className="py-5">
       <Row>
-        <Col xl="12" className="text-break">
-          <p className="w-100">{token}</p>
-          <p className="w-100">{error}</p>
+        <Col xl="12" className="text-break d-flex flex-column py-2">
+          <textarea className="w-100" value={JSON.stringify(header)} />
+          <textarea className="w-100" value={JSON.stringify(payload)} />
         </Col>
-        <Col xl="12">
+        <Col xl="12" className="d-flex justify-content-center py-2">
           <AccountDropdown
             signingAccounts={signingAccounts}
             selectedSigningAccount={signingAccount}
@@ -117,9 +124,9 @@ function App() {
             }
           />
         </Col>
-        <Col xl="12" className="text-break d-flex flex-column">
-          <textarea className="w-100" value={JSON.stringify(header)} />
-          <textarea className="w-100" value={JSON.stringify(payload)} />
+        <Col xl="12" className="text-break py-2">
+          <p className="w-100">{token}</p>
+          <p className="w-100">{error}</p>
         </Col>
       </Row>
     </Container>
