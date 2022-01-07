@@ -1,6 +1,13 @@
 import './App.css';
-import { Row, Col, Container, Dropdown, DropdownButton } from 'react-bootstrap';
-import { useState, useEffect } from 'react';
+import {
+  Row,
+  Col,
+  Container,
+  Dropdown,
+  DropdownButton,
+  Form,
+} from 'react-bootstrap';
+import { useState, useEffect, useRef } from 'react';
 import {
   JW3TContent,
   JW3TSigner,
@@ -16,25 +23,33 @@ let initializeAccounts = async () => {
   await cryptoWaitReady();
   return loadSigningAccounts();
 };
-let createToken = async (signingAccount) => {
+
+let getInitalContent = () => {
   let header = {
     alg: 'sr25519',
     typ: 'JW3T',
     add: 'ss58',
   };
   let payload = {
-    add: signingAccount?.account?.address,
+    add: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
   };
 
   let exp = Math.floor(Date.now() / 1000) + 24 * 3600; // expire in 24 hours
   let content = new JW3TContent(header, payload)
     .setAudience('uri:test')
     .setExpiration(exp);
+
+  let h = JSON.stringify(content.header, null, 4);
+  let p = JSON.stringify(content.payload, null, 4);
+  return { header: h, payload: p };
+};
+
+let createToken = async (headerJson, payloadJson, signingAccount) => {
+  let content = new JW3TContent(headerJson, payloadJson);
   let polkaJsSigner = new PolkaJsSigner(signingAccount);
   let jw3tSigner = new JW3TSigner(polkaJsSigner, content);
   let { base64Content, base64Sig } = await jw3tSigner.getSignature();
-  let jw3t = `${base64Content}.${base64Sig}`;
-  return jw3t;
+  return `${base64Content}.${base64Sig}`;
 };
 
 let verifyToken = async (token) => {
@@ -78,55 +93,160 @@ function AccountDropdown({
     </DropdownButton>
   );
 }
+function resetTextareaHeight(textareaRef) {
+  if (textareaRef?.current) {
+    textareaRef.current.style = { ...textareaRef.current.style, height: '0px' };
+    const scrollHeight = textareaRef.current.scrollHeight || 0;
+    textareaRef.current.style.height = scrollHeight + 'px';
+  }
+}
 function App() {
+  let { header: initHeader, payload: initPayload } = getInitalContent() || {};
   let [signingAccounts, setSigningAccounts] = useState([]);
   let [signingAccount, setSigningAccount] = useState();
+  let [header, setHeader] = useState(initHeader);
+  let [headerError, setHeaderError] = useState();
+  let [payload, setPayload] = useState(initPayload);
+  let [payloadError, setPayloadError] = useState();
   let [token, setToken] = useState('');
-  let [{ header, payload }, setContent] = useState({});
-  let [error, setError] = useState();
+  let [tokenError, setTokenError] = useState();
+  let [isValid, setIsValid] = useState();
+  let headerTextareaRef = useRef();
+  let payloadTextareaRef = useRef();
+  let tokenTextareaRef = useRef();
+
   useEffect(() => {
     initializeAccounts().then((accounts) => {
       accounts && console.log(accounts[0]?.address || 'noaddress');
       setSigningAccounts(accounts);
+      accounts?.[0]?.account?.address &&
+        setPayloadAddress(accounts?.[0]?.account?.address);
       setSigningAccount(accounts[0]);
     });
   }, []);
 
   useEffect(() => {
+    setHeaderError('');
+    setPayloadError('');
+    resetTextareaHeight(headerTextareaRef);
+    resetTextareaHeight(payloadTextareaRef);
+
+    setToken('');
+    let headerJson;
+    let payloadJson;
+    try {
+      headerJson = JSON.parse(header);
+    } catch (err) {
+      setHeaderError(err?.message || err);
+      return;
+    }
+    try {
+      payloadJson = JSON.parse(payload);
+    } catch (err) {
+      setPayloadError(err?.message || err);
+      return;
+    }
     signingAccount &&
-      createToken(signingAccount)
+      createToken(headerJson, payloadJson, signingAccount)
         .then((token) => setToken(token))
-        .catch((err) => alert(err));
-  }, [signingAccount]);
+        .catch((err) => {
+          setTokenError(err?.message || err);
+        });
+  }, [signingAccount, header, payload]);
 
   useEffect(() => {
+    setTokenError('');
     token &&
       verifyToken(token)
         .then((content) => {
           console.log(content);
-          setContent(content);
+          setIsValid(true);
         })
-        .catch((err) => setError(err?.message || err));
+        .catch((err) => setTokenError(err?.message || err));
   }, [token]);
+
+  const setPayloadAddress = (address) => {
+    !payloadError &&
+      setPayload((payload) => {
+        let newPayload = payload;
+        try {
+          let payloadJson = JSON.parse(payload);
+          payloadJson.add = address;
+          newPayload = JSON.stringify(payloadJson, null, 4);
+        } catch (err) {
+          console.log(
+            'can not change the payload address since payload is not a in valid json format.'
+          );
+        }
+        return newPayload;
+      });
+  };
+  const selectAccountHandler = (signingAccount) => {
+    setSigningAccount(signingAccount);
+    signingAccount?.account?.address &&
+      setPayloadAddress(signingAccount?.account?.address);
+  };
+
   return (
     <Container className="py-5">
       <Row>
         <Col xl="12" className="text-break d-flex flex-column py-2">
-          <textarea className="w-100" value={JSON.stringify(header)} />
-          <textarea className="w-100" value={JSON.stringify(payload)} />
+          <Form.Group className="my-2">
+            <Form.Label>
+              <strong>Header</strong>
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              ref={headerTextareaRef}
+              className="w-100"
+              value={header}
+              onChange={(e) => setHeader(e?.target?.value)}
+            />
+            {headerError && (
+              <Form.Text className="text-danger">{headerError || ''}</Form.Text>
+            )}
+          </Form.Group>
+          <Form.Group className="my-2">
+            <Form.Label>
+              <strong>Payload</strong>
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              ref={payloadTextareaRef}
+              className="w-100"
+              value={payload}
+              onChange={(e) => setPayload(e?.target?.value)}
+            />
+            {payloadError && (
+              <Form.Text className="text-danger">{payloadError}</Form.Text>
+            )}
+          </Form.Group>
         </Col>
         <Col xl="12" className="d-flex justify-content-center py-2">
           <AccountDropdown
             signingAccounts={signingAccounts}
             selectedSigningAccount={signingAccount}
             selectHandler={(signingAccount) =>
-              setSigningAccount(signingAccount)
+              selectAccountHandler(signingAccount)
             }
           />
         </Col>
         <Col xl="12" className="text-break py-2">
-          <p className="w-100">{token}</p>
-          <p className="w-100">{error}</p>
+          <Form.Group className="my-2">
+            <Form.Label>
+              <strong>Encoded JW3T</strong>
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              ref={tokenTextareaRef}
+              style={{ resize: 'none' }}
+              className="w-100"
+              value={token}
+            />
+            {tokenError && (
+              <Form.Text className="text-danger">{tokenError}</Form.Text>
+            )}
+          </Form.Group>
         </Col>
       </Row>
     </Container>
