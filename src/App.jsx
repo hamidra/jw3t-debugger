@@ -134,24 +134,26 @@ function App() {
     setToken('');
     let headerJson;
     let payloadJson;
+    let contentIsInvalid = false;
     try {
       headerJson = JSON.parse(header);
     } catch (err) {
       setHeaderError(err?.message || err);
-      return;
+      contentIsInvalid = true;
     }
     try {
       payloadJson = JSON.parse(payload);
     } catch (err) {
       setPayloadError(err?.message || err);
-      return;
+      contentIsInvalid = true;
     }
-    signingAccount &&
+    if (!contentIsInvalid && signingAccount) {
       createToken(headerJson, payloadJson, signingAccount)
         .then((token) => setToken(token))
         .catch((err) => {
           setTokenError(err?.message || err);
         });
+    }
   }, [signingAccount, header, payload]);
 
   useEffect(() => {
@@ -198,7 +200,7 @@ function App() {
             <Form.Control
               as="textarea"
               ref={headerTextareaRef}
-              className="w-100"
+              className="w-100 fw-light"
               value={header}
               onChange={(e) => setHeader(e?.target?.value)}
             />
@@ -213,7 +215,7 @@ function App() {
             <Form.Control
               as="textarea"
               ref={payloadTextareaRef}
-              className="w-100"
+              className="w-100 fw-light"
               value={payload}
               onChange={(e) => setPayload(e?.target?.value)}
             />
@@ -240,7 +242,7 @@ function App() {
               as="textarea"
               ref={tokenTextareaRef}
               style={{ resize: 'none' }}
-              className="w-100"
+              className="w-100 fw-light"
               value={token}
             />
             {tokenError && (
