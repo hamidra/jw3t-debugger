@@ -5971,10 +5971,10 @@ jsonpointer@^5.0.0:
     array-includes "^3.1.3"
     object.assign "^4.1.2"
 
-jw3t@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/jw3t/-/jw3t-1.0.4.tgz#4ec45138527427cedb11825fbfaf54e66816c47f"
-  integrity sha512-qJZ2A+hupV2WDZQ/BOkPsIFyc95E91lAqvTkqux4V/Eq0lgZlAuJ1Ber/0r+3x6CeE/AtbsweVohyU2yc358Cw==
+jw3t@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/jw3t/-/jw3t-1.0.5.tgz#934be03639165bc9ccb6fd0e4f81e9d91b3c341c"
+  integrity sha512-kqf2P3itdbaYQzs77HAtHayJASv2/HYNk00OBM0IM0LX16G+44m9r9sEw+scx226Mmo2jUPMimuP18/fqQ44lg==
   dependencies:
     "@polkadot/api" "^6.12.1"
     "@polkadot/keyring" "^8.1.2"
