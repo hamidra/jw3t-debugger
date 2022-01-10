@@ -11,7 +11,7 @@ export const loadSigningAccounts = async () => {
     '//Alice',
     '//Bob',
     '//Charlie',
-    '//Bob',
+    '//Dave',
     '//Eve',
     '//Fredie',
   ];

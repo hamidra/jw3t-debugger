@@ -11,6 +11,7 @@
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
     "bootstrap": "5.1.3",
+    "gh-pages": "^3.2.3",
     "jw3t": "^1.0.5",
     "react": "^17.0.2",
     "react-bootstrap": "^2.0.4",
@@ -22,8 +23,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "yarn run build",
+    "deploy": "gh-pages -d build"
   },
+  "homepage": "http://hamidra.github.io/jw3t-debugger",
   "eslintConfig": {
     "extends": [
       "react-app",
