@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/jw3t-debugger/static/css/main.b38d7084.css",
+    "main.js": "/jw3t-debugger/static/js/main.86a2a8a0.js",
+    "static/js/787.7ff737eb.chunk.js": "/jw3t-debugger/static/js/787.7ff737eb.chunk.js",
+    "index.html": "/jw3t-debugger/index.html",
+    "main.b38d7084.css.map": "/jw3t-debugger/static/css/main.b38d7084.css.map",
+    "main.86a2a8a0.js.map": "/jw3t-debugger/static/js/main.86a2a8a0.js.map",
+    "787.7ff737eb.chunk.js.map": "/jw3t-debugger/static/js/787.7ff737eb.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b38d7084.css",
+    "static/js/main.86a2a8a0.js"
+  ]
+}
