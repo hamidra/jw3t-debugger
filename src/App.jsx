@@ -6,6 +6,7 @@ import {
   Dropdown,
   DropdownButton,
   Form,
+  Button,
 } from 'react-bootstrap';
 import { useState, useEffect, useRef } from 'react';
 import {
@@ -147,13 +148,6 @@ function App() {
       setPayloadError(err?.message || err);
       contentIsInvalid = true;
     }
-    if (!contentIsInvalid && signingAccount) {
-      createToken(headerJson, payloadJson, signingAccount)
-        .then((token) => setToken(token))
-        .catch((err) => {
-          setTokenError(err?.message || err);
-        });
-    }
   }, [signingAccount, header, payload]);
 
   useEffect(() => {
@@ -167,6 +161,17 @@ function App() {
         .catch((err) => setTokenError(err?.message || err));
   }, [token]);
 
+  const SignBtnClickHandler = () => {
+    if (!payloadError && !headerError && signingAccount) {
+      let headerJson = JSON.parse(header);
+      let payloadJson = JSON.parse(payload);
+      createToken(headerJson, payloadJson, signingAccount)
+        .then((token) => setToken(token))
+        .catch((err) => {
+          setTokenError(err?.message || err);
+        });
+    }
+  };
   const setPayloadAddress = (address) => {
     !payloadError &&
       setPayload((payload) => {
@@ -232,6 +237,15 @@ function App() {
               selectAccountHandler(signingAccount)
             }
           />
+        </Col>
+        <Col xl="12" className="d-flex justify-content-center py-2">
+          <Button
+            className="ms-2"
+            onClick={() => {
+              SignBtnClickHandler();
+            }}>
+            Sign token
+          </Button>
         </Col>
         <Col xl="12" className="text-break py-2">
           <Form.Group className="my-2">
