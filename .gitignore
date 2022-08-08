@@ -105,3 +105,6 @@ dist
 
 # create react app
 build
+
+# misc
+.DS_Store

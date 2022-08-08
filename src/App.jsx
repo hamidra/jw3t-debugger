@@ -27,12 +27,15 @@ let initializeAccounts = async () => {
 
 let getInitalContent = () => {
   let header = {
-    alg: 'sr25519',
-    typ: 'JW3T',
-    add: 'ss58',
+    algorithm: 'sr25519',
+    token_type: 'JW3T',
+    address_type: 'ss58',
   };
   let payload = {
-    add: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+    address: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+    nonce: 'f77b70',
+    on_behalf_of: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+    proxy_type: 'governance',
   };
 
   let exp = Math.floor(Date.now() / 1000) + 24 * 3600; // expire in 24 hours
@@ -49,6 +52,7 @@ let createToken = async (headerJson, payloadJson, signingAccount) => {
   let content = new JW3TContent(headerJson, payloadJson);
   let polkaJsSigner = new PolkaJsSigner(signingAccount);
   let jw3tSigner = new JW3TSigner(polkaJsSigner, content);
+  console.log(content.stringify());
   let { base64Content, base64Sig } = await jw3tSigner.getSignature();
   return `${base64Content}.${base64Sig}`;
 };
@@ -82,7 +86,8 @@ function AccountDropdown({
       title={title}
       onSelect={(selectedIdx) =>
         selectHandler && selectHandler(signingAccounts[selectedIdx])
-      }>
+      }
+    >
       {signingAccounts.map((sa, idx) => {
         let text = getAccountDisplayStr(sa?.account);
         return (
@@ -178,7 +183,7 @@ function App() {
         let newPayload = payload;
         try {
           let payloadJson = JSON.parse(payload);
-          payloadJson.add = address;
+          payloadJson.address = address;
           newPayload = JSON.stringify(payloadJson, null, 4);
         } catch (err) {
           console.log(
@@ -243,7 +248,8 @@ function App() {
             className="ms-2"
             onClick={() => {
               SignBtnClickHandler();
-            }}>
+            }}
+          >
             Sign token
           </Button>
         </Col>
