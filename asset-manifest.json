@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/jw3t-debugger/static/css/main.c055fe1c.css",
-    "main.js": "/jw3t-debugger/static/js/main.a03d5390.js",
-    "static/js/787.9ddd1562.chunk.js": "/jw3t-debugger/static/js/787.9ddd1562.chunk.js",
+    "main.css": "/jw3t-debugger/static/css/main.4f95e5c1.css",
+    "main.js": "/jw3t-debugger/static/js/main.53a49b93.js",
+    "static/js/787.e153b190.chunk.js": "/jw3t-debugger/static/js/787.e153b190.chunk.js",
     "index.html": "/jw3t-debugger/index.html",
-    "main.c055fe1c.css.map": "/jw3t-debugger/static/css/main.c055fe1c.css.map",
-    "main.a03d5390.js.map": "/jw3t-debugger/static/js/main.a03d5390.js.map",
-    "787.9ddd1562.chunk.js.map": "/jw3t-debugger/static/js/787.9ddd1562.chunk.js.map"
+    "main.4f95e5c1.css.map": "/jw3t-debugger/static/css/main.4f95e5c1.css.map",
+    "main.53a49b93.js.map": "/jw3t-debugger/static/js/main.53a49b93.js.map",
+    "787.e153b190.chunk.js.map": "/jw3t-debugger/static/js/787.e153b190.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.c055fe1c.css",
-    "static/js/main.a03d5390.js"
+    "static/css/main.4f95e5c1.css",
+    "static/js/main.53a49b93.js"
   ]
 }
